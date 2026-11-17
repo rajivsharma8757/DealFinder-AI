@@ -45,13 +45,18 @@ export async function processAssistantMessage(
     // Find products mentioned in query
     const matched = allProducts.filter(p =>
       queryLower.includes(p.brand.toLowerCase()) ||
-      queryLower.includes(p.title.toLowerCase().split(' ')[0].toLowerCase()) ||
+      p.title.toLowerCase().split(' ').some(w => w.length > 2 && queryLower.includes(w)) ||
       (p.tags || []).some(t => queryLower.includes(t.toLowerCase()))
     );
 
-    const candidates = matched.length >= 2 ? matched.slice(0, 3) : allProducts.filter(p => p.category === 'Mobiles').slice(0, 2);
-    const p1 = candidates[0];
-    const p2 = candidates[1];
+    const candidates = matched.length >= 2
+      ? matched.slice(0, 3)
+      : matched.length === 1
+      ? [matched[0], allProducts.find(p => p.id !== matched[0].id) || allProducts[0]]
+      : allProducts.slice(0, 2);
+
+    const p1 = candidates[0] || allProducts[0];
+    const p2 = candidates[1] || allProducts[1] || p1;
     const best1 = getBestEligiblePrice(p1);
     const best2 = getBestEligiblePrice(p2);
 

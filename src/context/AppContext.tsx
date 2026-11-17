@@ -37,21 +37,21 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [wishlist, setWishlist] = useState<string[]>(['prod_iphone16_128', 'prod_sony_wh1000xm5']);
+  const [wishlist, setWishlist] = useState<string[]>(['prod_iphone_16', 'prod_sony_xm4']);
   const [searchHistory, setSearchHistory] = useState<string[]>([
     'iPhone 16 128GB',
-    'Sony WH-1000XM5',
+    'Sony WH-1000XM4',
     'Gaming laptop under ₹60,000'
   ]);
-  const [comparisonIds, setComparisonIds] = useState<string[]>(['prod_iphone16_128', 'prod_samsung_s24_ultra']);
+  const [comparisonIds, setComparisonIds] = useState<string[]>(['prod_iphone_16', 'prod_sony_xm4']);
   const [priceAlerts, setPriceAlerts] = useState<PriceAlert[]>([
     {
       id: 'alert_1',
-      product_id: 'prod_iphone16_128',
+      product_id: 'prod_iphone_16',
       product_title: 'Apple iPhone 16 (128 GB) - Ultramarine',
       target_price: 72000,
       current_price: 76999,
-      email: 'rajiv.sharma@example.com',
+      email: 'rajiv.sharma@dealfinder.ai',
       created_at: '2026-11-10',
       is_active: true
     }
