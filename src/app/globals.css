@@ -1,0 +1,69 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #101312;
+  --surface: #191F1C;
+  --surface-secondary: #222B26;
+  --surface-border: #2A352F;
+  --primary-green: #22C55E;
+  --emerald-accent: #10B981;
+  --text-main: #F5F7F5;
+  --text-muted: #A7B0AA;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--text-main);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* Glassmorphism card utilities */
+.glass-panel {
+  background: rgba(25, 31, 28, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(42, 53, 47, 0.8);
+}
+
+.glass-panel-hover {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-panel-hover:hover {
+  background: rgba(34, 43, 38, 0.85);
+  border-color: rgba(34, 197, 94, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 0 15px rgba(34, 197, 94, 0.1);
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #101312;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2A352F;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3B4B42;
+}
+
+/* Accent Badge glow */
+.badge-glow {
+  box-shadow: 0 0 10px rgba(34, 197, 94, 0.3);
+}
+
+.badge-glow-amber {
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.3);
+}
