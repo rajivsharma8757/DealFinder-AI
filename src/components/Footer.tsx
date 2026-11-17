@@ -81,11 +81,11 @@ export default function Footer() {
 
         {/* Disclaimer & Bottom Bar */}
         <div className="border-t border-[#2A352F] mt-12 pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-gray-500">
-          <p>
-            © {new Date().getFullYear()} DealFinder AI. All product images, logos, trademarks, and brand names belong to their respective owners. Prices and promotions are subject to merchant terms.
+          <p className="max-w-3xl leading-relaxed">
+            © {new Date().getFullYear()} DealFinder AI. All product images, logos, trademarks, and brand names belong to their respective owners. <span className="text-gray-400">Notice: Retailer prices and offers represent indexed catalog benchmarks and demonstration feeds for academic evaluation. Actual purchase prices, bank eligibility, and delivery fees are determined at retailer checkout.</span>
           </p>
-          <div className="flex items-center gap-6">
-            <span className="text-gray-400 font-medium">Tagline: "Search Once. Compare Everywhere. Save More."</span>
+          <div className="flex items-center gap-6 flex-shrink-0">
+            <span className="text-gray-400 font-medium">Tagline: &quot;Search Once. Compare Everywhere. Save More.&quot;</span>
           </div>
         </div>
 

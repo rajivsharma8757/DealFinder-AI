@@ -3,9 +3,10 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, Mic, X, ArrowRight, Sparkles, TrendingUp, History } from 'lucide-react';
+import { Search, X, ArrowRight, Sparkles, TrendingUp, History } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import { TRENDING_SEARCHES } from '@/lib/engine/search';
+import VoiceInputButton from '@/components/VoiceInputButton';
 
 interface SearchBarProps {
   initialQuery?: string;
@@ -22,7 +23,6 @@ export default function SearchBar({
   const { searchHistory, addSearchHistory, clearSearchHistory } = useApp();
   const [query, setQuery] = useState(initialQuery);
   const [isFocused, setIsFocused] = useState(false);
-  const [isListening, setIsListening] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Sync with prop if it changes
@@ -49,47 +49,9 @@ export default function SearchBar({
     router.push(`/search?q=${encodeURIComponent(q)}`);
   };
 
-  const handleVoiceSearch = () => {
-    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-      // Simulate voice input fallback
-      setIsListening(true);
-      setTimeout(() => {
-        setIsListening(false);
-        const voiceSample = 'iPhone 16 128GB';
-        setQuery(voiceSample);
-        handleSearch(voiceSample);
-      }, 1500);
-      return;
-    }
-
-    try {
-      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-      const recognition = new SpeechRecognition();
-      recognition.lang = 'en-IN';
-      recognition.interimResults = false;
-      recognition.maxAlternatives = 1;
-
-      setIsListening(true);
-
-      recognition.onresult = (event: any) => {
-        const transcript = event.results[0][0].transcript;
-        setQuery(transcript);
-        setIsListening(false);
-        handleSearch(transcript);
-      };
-
-      recognition.onerror = () => {
-        setIsListening(false);
-      };
-
-      recognition.onend = () => {
-        setIsListening(false);
-      };
-
-      recognition.start();
-    } catch {
-      setIsListening(false);
-    }
+  const handleVoiceTranscript = (text: string) => {
+    setQuery(text);
+    // User can see the text and edit it or submit
   };
 
   const isLarge = size === 'large';
@@ -132,24 +94,13 @@ export default function SearchBar({
           </button>
         )}
 
-        {/* Voice Search Button */}
-        <button
-          type="button"
-          onClick={handleVoiceSearch}
-          className={`p-2 rounded-xl transition-all ${
-            isListening 
-              ? 'bg-red-500 text-white animate-pulse' 
-              : 'text-gray-400 hover:text-emerald-400 hover:bg-[#222B26]'
-          }`}
-          title="Voice Search"
-        >
-          <Mic className="w-4 h-4" />
-        </button>
+        {/* Dual-Language Voice Input Button */}
+        <VoiceInputButton onTranscript={handleVoiceTranscript} />
 
         {/* Submit Search Button */}
         <button
           type="submit"
-          className={`rounded-xl bg-gradient-to-r from-emerald-500 to-green-500 text-black font-bold flex items-center justify-center transition-all hover:scale-[1.02] shadow-lg shadow-emerald-500/20 ${
+          className={`rounded-xl bg-gradient-to-r from-emerald-500 to-green-500 text-black font-bold flex items-center justify-center transition-all hover:scale-[1.02] shadow-lg shadow-emerald-500/20 ml-1.5 ${
             isLarge ? 'px-6 py-3 text-sm' : 'px-4 py-2 text-xs'
           }`}
         >
@@ -222,7 +173,7 @@ export default function SearchBar({
           <div className="mt-4 pt-3 border-t border-[#2A352F] flex items-center justify-between text-[11px] text-gray-500">
             <span className="flex items-center gap-1">
               <Sparkles className="w-3 h-3 text-emerald-400" />
-              Tip: Try searching with budget (e.g., "laptop under 60000" or "shoes below 3k")
+              Tip: Try voice searching in Hindi or English (e.g. "Mujhe running shoes dikhao")
             </span>
           </div>
 

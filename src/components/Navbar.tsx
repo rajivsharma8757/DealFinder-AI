@@ -1,9 +1,9 @@
 // src/components/Navbar.tsx - DealFinder AI Main Navigation Header
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { 
   Sparkles, 
   Search, 
@@ -16,17 +16,37 @@ import {
   User as UserIcon, 
   Menu, 
   X, 
-  TrendingUp,
-  SlidersHorizontal,
-  ChevronDown
+  ChevronDown,
+  LayoutDashboard,
+  Bell,
+  LogOut,
+  UserCheck
 } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 
 export default function Navbar() {
   const pathname = usePathname();
-  const { wishlist, comparisonIds, user, selectedBank, setSelectedBank, setSearchModalOpen } = useApp();
+  const router = useRouter();
+  const { wishlist, comparisonIds, user, profile, logout, selectedBank, setSelectedBank, setSearchModalOpen } = useApp();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [bankDropdownOpen, setBankDropdownOpen] = useState(false);
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+  const bankMenuRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdowns on outside click
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setUserDropdownOpen(false);
+      }
+      if (bankMenuRef.current && !bankMenuRef.current.contains(event.target as Node)) {
+        setBankDropdownOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const navLinks = [
     { name: 'Home', href: '/' },
@@ -48,6 +68,12 @@ export default function Navbar() {
     'IDFC FIRST Bank',
     'None (Regular MRP)'
   ];
+
+  const handleSignOut = async () => {
+    setUserDropdownOpen(false);
+    await logout();
+    router.push('/login');
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-[#2A352F] bg-[#101312]/90 backdrop-blur-md">
@@ -102,7 +128,7 @@ export default function Navbar() {
           </div>
 
           {/* Right Header Actions */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
             
             {/* Quick Search Button */}
             <button
@@ -118,7 +144,7 @@ export default function Navbar() {
             </button>
 
             {/* Bank Card Active Selector */}
-            <div className="relative hidden xl:block">
+            <div ref={bankMenuRef} className="relative hidden xl:block">
               <button
                 onClick={() => setBankDropdownOpen(!bankDropdownOpen)}
                 className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[#191F1C] border border-[#2A352F] text-xs text-gray-300 hover:border-emerald-500/40 transition-colors"
@@ -130,8 +156,7 @@ export default function Navbar() {
 
               {bankDropdownOpen && (
                 <div 
-                  className="absolute right-0 mt-2 w-52 bg-[#191F1C] border border-[#2A352F] rounded-xl shadow-2xl py-1 z-50"
-                  onMouseLeave={() => setBankDropdownOpen(false)}
+                  className="absolute right-0 mt-2 w-52 bg-[#191F1C] border border-[#2A352F] rounded-2xl shadow-2xl py-2 z-50"
                 >
                   <div className="px-3 py-1.5 text-[11px] font-semibold text-gray-400 uppercase tracking-wider border-b border-[#2A352F]">
                     Optimize Card Offers
@@ -183,25 +208,102 @@ export default function Navbar() {
               )}
             </Link>
 
-            {/* User Profile / Dashboard */}
+            {/* AUTH STATE: LOGGED IN vs LOGGED OUT */}
             {user ? (
-              <Link
-                href="/dashboard"
-                className="flex items-center gap-2 p-1.5 pr-2.5 rounded-lg bg-[#191F1C] border border-[#2A352F] hover:border-emerald-500/40 transition-colors"
-              >
-                <div className="w-6 h-6 rounded-md bg-emerald-600/30 border border-emerald-500/40 text-emerald-400 text-xs font-bold flex items-center justify-center">
-                  {user.name.charAt(0)}
-                </div>
-                <span className="text-xs font-medium text-gray-200 hidden sm:inline">{user.name.split(' ')[0]}</span>
-              </Link>
+              <div ref={userMenuRef} className="relative">
+                <button
+                  type="button"
+                  onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+                  className="flex items-center gap-2 p-1.5 pr-2.5 rounded-xl bg-[#191F1C] border border-[#2A352F] hover:border-emerald-500/50 transition-colors"
+                >
+                  <div className="w-7 h-7 rounded-lg overflow-hidden bg-gradient-to-tr from-emerald-600 to-green-400 text-black font-black text-xs flex items-center justify-center shadow-md">
+                    {profile?.avatar || user.avatar ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={profile?.avatar || user.avatar} alt="Avatar" className="w-full h-full object-cover" />
+                    ) : (
+                      user.name.charAt(0) || 'U'
+                    )}
+                  </div>
+                  <span className="text-xs font-semibold text-gray-200 hidden sm:inline max-w-[90px] truncate">
+                    {user.name.split(' ')[0]}
+                  </span>
+                  <ChevronDown className="w-3 h-3 text-gray-400" />
+                </button>
+
+                {/* User Dropdown Menu */}
+                {userDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-60 bg-[#191F1C] border border-[#2A352F] rounded-2xl shadow-2xl p-2 z-50 backdrop-blur-xl animate-in fade-in duration-150">
+                    <div className="p-3 border-b border-[#2A352F] space-y-0.5">
+                      <div className="text-xs font-bold text-white truncate">{user.name}</div>
+                      <div className="text-[11px] text-gray-400 truncate">{user.email}</div>
+                    </div>
+
+                    <div className="py-1 space-y-0.5 text-xs">
+                      <Link
+                        href="/dashboard"
+                        onClick={() => setUserDropdownOpen(false)}
+                        className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-gray-300 hover:text-white hover:bg-[#222B26] transition-colors"
+                      >
+                        <LayoutDashboard className="w-3.5 h-3.5 text-emerald-400" />
+                        <span>Dashboard Overview</span>
+                      </Link>
+
+                      <Link
+                        href="/dashboard/profile"
+                        onClick={() => setUserDropdownOpen(false)}
+                        className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-gray-300 hover:text-white hover:bg-[#222B26] transition-colors"
+                      >
+                        <UserCheck className="w-3.5 h-3.5 text-emerald-400" />
+                        <span>My Profile & Settings</span>
+                      </Link>
+
+                      <Link
+                        href="/wishlist"
+                        onClick={() => setUserDropdownOpen(false)}
+                        className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-gray-300 hover:text-white hover:bg-[#222B26] transition-colors"
+                      >
+                        <Heart className="w-3.5 h-3.5 text-pink-400" />
+                        <span>Saved Wishlist ({wishlist.length})</span>
+                      </Link>
+
+                      <Link
+                        href="/price-alerts"
+                        onClick={() => setUserDropdownOpen(false)}
+                        className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-gray-300 hover:text-white hover:bg-[#222B26] transition-colors"
+                      >
+                        <Bell className="w-3.5 h-3.5 text-amber-400" />
+                        <span>Price Drop Alerts</span>
+                      </Link>
+                    </div>
+
+                    <div className="pt-1 border-t border-[#2A352F]">
+                      <button
+                        type="button"
+                        onClick={handleSignOut}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-red-400 hover:bg-red-950/30 transition-colors text-left"
+                      >
+                        <LogOut className="w-3.5 h-3.5" />
+                        <span>Sign Out</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             ) : (
-              <Link
-                href="/login"
-                className="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black font-semibold text-xs transition-colors flex items-center gap-1 shadow-md shadow-emerald-500/20"
-              >
-                <UserIcon className="w-3.5 h-3.5" />
-                <span>Sign In</span>
-              </Link>
+              <div className="flex items-center gap-2">
+                <Link
+                  href="/login"
+                  className="px-3 py-1.5 rounded-xl text-xs font-semibold text-gray-300 hover:text-white hover:bg-[#191F1C] border border-[#2A352F] transition-colors"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/signup"
+                  className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 text-black font-bold text-xs transition-all shadow-md shadow-emerald-500/20"
+                >
+                  Sign Up
+                </Link>
+              </div>
             )}
 
             {/* Mobile menu trigger */}
@@ -238,13 +340,40 @@ export default function Navbar() {
             </Link>
           ))}
           <div className="pt-3 border-t border-[#2A352F] flex flex-col gap-2">
-            <Link
-              href="/admin"
-              onClick={() => setMobileMenuOpen(false)}
-              className="text-xs text-gray-400 hover:text-emerald-400 px-3 py-1.5"
-            >
-              Admin Dashboard & Providers
-            </Link>
+            {user ? (
+              <>
+                <Link
+                  href="/dashboard"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-xs text-emerald-400 px-3 py-1.5 font-bold"
+                >
+                  Go to Dashboard &rarr;
+                </Link>
+                <button
+                  onClick={handleSignOut}
+                  className="text-xs text-red-400 px-3 py-1.5 text-left font-semibold"
+                >
+                  Sign Out
+                </button>
+              </>
+            ) : (
+              <div className="flex gap-2 px-3 py-1.5">
+                <Link
+                  href="/login"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex-1 text-center py-2 rounded-xl bg-[#191F1C] border border-[#2A352F] text-xs font-semibold text-white"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/signup"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex-1 text-center py-2 rounded-xl bg-emerald-500 text-black text-xs font-bold"
+                >
+                  Sign Up
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       )}

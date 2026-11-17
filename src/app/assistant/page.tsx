@@ -8,16 +8,13 @@ import {
   Sparkles, 
   User, 
   Layers, 
-  CreditCard, 
-  ArrowRight,
-  ExternalLink,
-  Mic,
   RefreshCw
 } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import { processAssistantMessage, AssistantResponse } from '@/lib/engine/assistant';
-import { ChatMessage, Product } from '@/types';
+import { ChatMessage } from '@/types';
 import ProductCard from '@/components/ProductCard';
+import VoiceInputButton from '@/components/VoiceInputButton';
 
 export default function AssistantPage() {
   const { selectedBank, addToComparison } = useApp();
@@ -26,17 +23,17 @@ export default function AssistantPage() {
       role: 'assistant',
       text: `Hello! I am your **DealFinder AI Shopping Assistant**.\n\n` +
             `I continuously monitor 20+ verified stores (Amazon India, Flipkart, Croma, Reliance Digital, Myntra, etc.) and calculate real-time savings with your credit cards and coupon codes.\n\n` +
-            `You can ask me in **English, Hindi, or Hinglish** — for example:\n` +
+            `You can talk to me via microphone or type in **English, Hindi, or Hinglish** — for example:\n` +
             `• *"Compare iPhone 16 on Amazon vs Croma"*\n` +
             `• *"Best gaming laptop under ₹60,000 with HDFC card offer"*\n` +
             `• *"Mujhe 25,000 ke andar sabse achha phone batao"*\n` +
-            `• *"Show me top fashion deals with coupons"*`,
+            `• *"Show me top running shoes with maximum discount"*`,
       data: {
         message: '',
         suggestedFollowUps: [
           'iPhone 16 under ₹80,000',
           'Gaming laptop with 16GB RAM under 60k',
-          'Best running shoes under ₹3,000',
+          'Nike running shoes under ₹3,000',
           'HDFC credit card electronic offers'
         ]
       }
@@ -92,6 +89,10 @@ export default function AssistantPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleVoiceTranscript = (text: string) => {
+    setInput(text);
   };
 
   return (
@@ -223,7 +224,7 @@ export default function AssistantPage() {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input Box */}
+      {/* Input Box with Dual-Language Voice Support */}
       <div className="pt-4 border-t border-[#2A352F] flex-shrink-0">
         <form
           onSubmit={(e) => {
@@ -236,9 +237,12 @@ export default function AssistantPage() {
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask DealFinder AI (e.g., 'Compare iPhone 16' or 'laptop under 60k with HDFC')..."
+            placeholder="Ask DealFinder AI or click mic to speak (EN/HI)..."
             className="flex-grow bg-transparent border-none text-white text-xs sm:text-sm px-3 focus:outline-none placeholder-gray-500"
           />
+
+          {/* Voice Input with Language Selector */}
+          <VoiceInputButton onTranscript={handleVoiceTranscript} />
 
           <button
             type="submit"

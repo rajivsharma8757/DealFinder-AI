@@ -25,13 +25,25 @@ export type RetailerName =
 
 export type ProductCategory =
   | 'All'
+  | 'Smartphones'
   | 'Mobiles'
   | 'Laptops'
+  | 'Tablets'
+  | 'Headphones'
   | 'Electronics'
+  | 'Smartwatches'
+  | 'Cameras'
+  | 'Televisions'
+  | 'Home Appliances'
   | 'Fashion'
+  | 'Shoes'
   | 'Footwear'
+  | 'Gaming'
+  | 'Kitchen'
   | 'Home & Kitchen'
   | 'Beauty'
+  | 'Furniture'
+  | 'Accessories'
   | string;
 
 export interface BankOffer {
@@ -156,9 +168,41 @@ export interface User {
   id: string;
   name: string;
   email: string;
+  phone?: string;
+  avatar?: string;
+  bio?: string;
   role: 'user' | 'admin';
   saved_cards: any[];
   created_at?: string;
+}
+
+export interface UserProfile {
+  userId: string;
+  fullName: string;
+  email: string;
+  phone?: string;
+  avatar?: string;
+  bio?: string;
+  location?: string;
+  preferredCard?: string;
+  completionPct: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SavedComparison {
+  id: string;
+  userId: string;
+  title: string;
+  productIds: string[];
+  createdAt: string;
+}
+
+export interface SearchHistoryItem {
+  id: string;
+  userId: string;
+  query: string;
+  timestamp: string;
 }
 
 export interface PriceAlert {

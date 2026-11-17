@@ -10,12 +10,12 @@
 
 1. **Universal Natural Language Search & Voice Recognition**
    - Natural language query understanding (e.g. *"laptop under 60000"*, *"Samsung phone below 25k"*, *"running shoes under 3000"*).
-   - Voice-search integration with browser speech recognition and fallback.
-   - Budget constraints, brand detection, and category filtering automatically parsed.
+   - Voice-search integration with browser Web Speech API (English `en-IN` and Hindi `hi-IN` toggle).
+   - Strict intent scoring, brand detection, category filtering, and duplicate removal.
 
-2. **20+ Indian Retailer Integration**
-   - Real-time comparison across Amazon India, Flipkart, Myntra, Meesho, Croma, Reliance Digital, AJIO, Tata CLiQ, Nykaa, JioMart, and 10+ emerging platforms.
-   - Verified feeds, affiliate feeds, and automated price sync engines with latency tracking.
+2. **128+ Expanded Multi-Category Catalog & 20+ Indian Retailers**
+   - 128 realistic products spanning 15 major categories: Smartphones, Laptops, Tablets, Headphones, Smartwatches, Cameras, Televisions, Home Appliances, Fashion, Shoes, Gaming, Kitchen, Beauty, Furniture, and Accessories.
+   - Comprehensive multi-store pricing comparison across Amazon India, Flipkart, Myntra, Croma, Reliance Digital, AJIO, Tata CLiQ, and Nykaa.
 
 3. **Net Effective Purchase Price Calculator**
    - True price ranking engine: `Net Price = Base Price - Max(Bank Offer, Coupon) + Delivery Fee`.
@@ -26,15 +26,20 @@
    - Deep specification matching, head-to-head recommendation reasoning, and direct comparison triggers.
 
 5. **Side-by-Side Product Comparison Matrix**
-   - Compare up to 4 products simultaneously with dynamic specification alignment (Processor, Display, Camera, Battery, Storage, OS, Warranty).
+   - Compare up to 4 products simultaneously with dynamic specification alignment.
    - Side-by-side merchant price grids with direct store checkout links.
 
-6. **Price Drop Alerts & 90-Day Trend Tracking**
-   - Custom threshold price alert notifications.
-   - 90-day price history graphs detecting genuine discounts versus inflated sales.
+6. **User Dashboard & Isolated Profile Management**
+   - Overview with real-time statistics (Wishlist count, Active Price Alerts, Comparisons, Search History).
+   - User profile management with profile completion score and avatar selector.
+   - User-isolated storage for saved comparisons, search history, and price drop notifications.
 
-7. **Admin Dashboard & Provider Management**
-   - Real-time catalog health monitoring, crawler ingestion telemetry, and round-trip provider connectivity tests.
+7. **Security Architecture & Production Hardening**
+   - **HttpOnly & SameSite Cookies:** Session tokens are stored strictly in secure HttpOnly cookies, completely hidden from client-side JavaScript.
+   - **Zero Secret Exposure:** Session tokens and raw password reset tokens are never returned in JSON API responses.
+   - **Bcrypt Password Hashing:** 10-round salted password hashing with secure server verification.
+   - **SHA-256 Single-Use Reset Tokens:** Password recovery uses cryptographically secure tokens with strict 15-minute expiration and immediate consumption.
+   - **Git-Ignored Runtime Storage:** Runtime databases and user data are strictly excluded from version control (`.gitignore`).
 
 ---
 
@@ -44,12 +49,8 @@
 - **UI Library:** React 19
 - **Language:** TypeScript 5.7
 - **Styling:** Tailwind CSS 3.4 with custom dark mode glassmorphism (`#101312` background, `#22C55E` emerald accent)
+- **Security:** Bcrypt.js, Node.js Crypto, HttpOnly Cookies
 - **Icons:** Lucide React
-- **Engine Modules:**
-  - `src/lib/engine/calculator.ts` — Net effective price ranking
-  - `src/lib/engine/search.ts` — Semantic natural language query parser & faceted search
-  - `src/lib/engine/assistant.ts` — Conversational AI shopping assistant
-  - `src/lib/engine/storeAdapters.ts` — 20 Indian retailer adapters & telemetry
 
 ---
 
@@ -59,92 +60,56 @@
 dealfinder-ai/
 ├── src/
 │   ├── app/
-│   │   ├── page.tsx                    # Home Page (Hero, Search, Super Deals, Promo)
-│   │   ├── deals/                      # Today's Best Super Deals
-│   │   ├── search/                     # Search Results & Multi-Criteria Filtering
-│   │   ├── products/[id]/              # Product Details, Store Comparison & Trends
+│   │   ├── page.tsx                    # Home Page (Hero, Search, Super Deals)
+│   │   ├── search/                     # Faceted Search Results & Relevance Engine
 │   │   ├── compare/                    # 4-Product Side-by-Side Comparison Matrix
 │   │   ├── assistant/                  # AI Shopping Assistant Chatbot
-│   │   ├── categories/                 # Category & Subcategory Directory
-│   │   ├── stores/                     # 20+ Indian Retailer Directory
-│   │   ├── offers/                     # Bank Offers & Card Stacking Engine
-│   │   ├── coupons/                    # Verified Promo Codes with 1-Click Copy
-│   │   ├── login/ & signup/            # Shopper Authentication
-│   │   ├── dashboard/                  # User Dashboard (Saved Items, Alerts, Cards)
-│   │   ├── wishlist/                   # Saved Products
-│   │   ├── history/                    # Search History
-│   │   ├── saved-comparisons/          # Saved Comparison Sets
-│   │   ├── price-alerts/               # Active Price Threshold Alerts
-│   │   ├── price-history/              # Market Price Trends
-│   │   ├── profile/                    # User Settings & Primary Discount Card
-│   │   ├── admin/                      # Operations Dashboard
-│   │   │   └── providers/              # Retailer Provider Management
-│   │   ├── api/                        # REST API Routes
-│   │   │   ├── products/               # Product search & single item retrieval
-│   │   │   ├── compare/                # Multi-product comparison API
-│   │   │   ├── offers/                 # Bank offers API
-│   │   │   ├── coupons/                # Coupons API
-│   │   │   ├── assistant/              # AI assistant POST endpoint
-│   │   │   ├── stores/                 # Retailers API
-│   │   │   └── admin/providers/        # Admin provider management API
-│   │   ├── globals.css                 # Dark theme, glassmorphism & Tailwind styles
-│   │   └── layout.tsx                  # Root layout with Navbar, Footer & Search Modal
-│   ├── components/                     # Reusable UI Components
-│   │   ├── Navbar.tsx
-│   │   ├── Footer.tsx
-│   │   ├── ProductCard.tsx
-│   │   ├── ComparisonTable.tsx
-│   │   ├── SearchBar.tsx
-│   │   ├── SearchModal.tsx
-│   │   ├── BankOfferCard.tsx
-│   │   ├── CouponCard.tsx
-│   │   └── PriceAlertModal.tsx
-│   ├── context/
-│   │   └── AppContext.tsx              # Global state (Wishlist, Compare, Alerts, Cards)
+│   │   ├── dashboard/                  # Authenticated User Dashboard
+│   │   ├── login/ & signup/            # Secure Shopper Authentication
+│   │   ├── forgot-password/            # Secure Password Reset Request
+│   │   ├── reset-password/             # Token-Verified Password Reset
+│   │   └── api/                        # Secure REST API Endpoints
+│   │       ├── auth/                   # login, signup, logout, me, reset routes
+│   │       └── user/                   # profile, wishlist, comparisons, alerts
+│   ├── components/                     # VoiceInputButton, Navbar, Footer, SearchBar
+│   ├── context/                        # AppContext (Session sync, Toast system)
 │   ├── lib/
-│   │   ├── data/catalog.ts             # Comprehensive Product & Promotion Catalog
-│   │   └── engine/                     # Calculation, Search & Adapter Engines
-│   └── types/
-│       └── index.ts                    # TypeScript Data Contracts
-├── package.json
-├── tsconfig.json
-├── tailwind.config.js
-└── next.config.js
+│   │   ├── data/catalog.ts             # 128-Product Multi-Category Catalog
+│   │   ├── db/index.ts                 # Secure Database & Session Engine
+│   │   └── engine/                     # Search, Price & Adapter Engines
+│   └── types/                          # TypeScript Contracts
+├── .env.example                        # Production Environment Template
+├── .gitignore                          # Strict Exclusion of Runtime Data & Secrets
+└── package.json
 ```
 
 ---
 
 ## 🚀 Getting Started
 
-### Prerequisites
+### 1. Prerequisites
 - Node.js 18.x or later
 - npm or yarn
 
-### Installation & Run
-
+### 2. Environment Setup
 ```bash
-# 1. Navigate to the project directory
-cd dealfinder-ai
+cp .env.example .env.local
+```
 
-# 2. Install dependencies (if not already installed)
+### 3. Run Locally
+```bash
+# Install dependencies
 npm install
 
-# 3. Start development server
+# Run development server
 npm run dev
 
-# 4. Open in browser
-# Visit http://localhost:3000
-```
-
-### Production Build
-
-```bash
-# Build optimized Next.js bundle
+# Or build and start production server
 npm run build
-
-# Start production server
 npm run start
 ```
+
+Visit [http://localhost:3000](http://localhost:3000).
 
 ---
 
